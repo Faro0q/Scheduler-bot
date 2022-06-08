@@ -19,25 +19,25 @@ def formatChecker(msg):
     timeReg = re.search("^(0[1-9]|1[0-9]|2[0123]):[0-5][0-9]$", time) # Check if time is valid
 
     if(len(msg) < 4):
-        return False
+        return "Incorrect format. Event not added."
     if(dateReg):
-        return False
+        return "Incorrect date format. Event not added."
     if(timeReg):
-        return False
+        return "Incorrect time format. Event not added."
     else:
-        return True
+        return ""
 
 def increment():
     global COUNT
     COUNT = COUNT+1
 
-def scheduling(msg):
+def newEvent(msg):
     # create csgo 9:00 @someone
-    event = ""
+    newEvent = ""
     for x in range(1, len(msg)):
-        event += msg[x] + " "
+        newEvent += msg[x] + " "
     
-    EVENTS.append(str(COUNT) + ". " + event.strip())
+    EVENTS.append(str(COUNT) + ". " + newEvent.strip())
     increment()
     print(EVENTS)
 
@@ -50,19 +50,19 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    date_time_str = datetime.now().strftime("%m/%d %H:%M ")
+    date_time_str = datetime.now().strftime("%m/%d %H:%M")
 
     await message.channel.send(date_time_str)
 
     if message.content.startswith('create'):
         userMessage = message.content.split(" ")
         print(userMessage)
-        isFormatted = formatChecker(userMessage)
-        if(isFormatted):
-            scheduling(userMessage)
-            await message.channel.send("Event added! Type 'events' to list all the events")
+        wrongFormat = formatChecker(userMessage)
+        if(wrongFormat):
+            await message.channel.send(wrongFormat)
         else:
-            await message.channel.send("Please input the correct format")
+            newEvent(userMessage)
+            await message.channel.send("Event added! Type 'events' to list all the events")
 
     if message.content.startswith('events'):
         if(len(EVENTS) == 0):
