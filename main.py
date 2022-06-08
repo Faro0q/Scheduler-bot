@@ -19,11 +19,11 @@ def formatChecker(msg):
     timeReg = re.search("^(0[1-9]|1[0-9]|2[0123]):[0-5][0-9]$", time) # Check if time is valid
 
     if(len(msg) < 4):
-        return "Incorrect format. Event not added."
-    if(dateReg):
-        return "Incorrect date format. Event not added."
-    if(timeReg):
-        return "Incorrect time format. Event not added."
+        return "Incorrect format. Type 'event help' to see the correct format."
+    elif not (dateReg):
+        return "Incorrect date format. Type 'event help' to see the correct format."
+    elif not (timeReg):
+        return "Incorrect time format. Type 'event help' to see the correct format."
     else:
         return ""
 
@@ -31,13 +31,15 @@ def increment():
     global COUNT
     COUNT = COUNT+1
 
-def newEvent(msg):
+def newEvent(msg, author):
     # create csgo 9:00 @someone
     newEvent = ""
     for x in range(1, len(msg)):
         newEvent += msg[x] + " "
     
-    EVENTS.append(str(COUNT) + ". " + newEvent.strip())
+    event = "**" + newEvent.strip() + "**"
+    author = "**" + str(author) + "**"
+    EVENTS.append(str(COUNT) + ". " + event + " created by: " + author)
     increment()
     print(EVENTS)
 
@@ -50,9 +52,9 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    date_time_str = datetime.now().strftime("%m/%d %H:%M")
+    # date_time_str = datetime.now().strftime("%m/%d %H:%M")
 
-    await message.channel.send(date_time_str)
+    # await message.channel.send(message.author)
 
     if message.content.startswith('create'):
         userMessage = message.content.split(" ")
@@ -61,7 +63,7 @@ async def on_message(message):
         if(wrongFormat):
             await message.channel.send(wrongFormat)
         else:
-            newEvent(userMessage)
+            newEvent(userMessage, message.author)
             await message.channel.send("Event added! Type 'events' to list all the events")
 
     if message.content.startswith('events'):
@@ -72,5 +74,9 @@ async def on_message(message):
             await message.channel.send('Events:\n')
             for x in EVENTS:
                 await message.channel.send(str(x))
+    
+    if message.content.startswith('event help'):
+        await message.channel.send("To create an event, please use this format:\n `create CSGO 06/08 09:00 @csnerd`")
+        
 
 client.run(os.getenv('token'))
